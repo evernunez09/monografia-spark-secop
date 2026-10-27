@@ -1,0 +1,7 @@
+Filas descargadas:            2,734,515
+Sin valor o sin fecha (fuera): 0
+Duplicados (fuera):            223
+Filas finales:                 2,734,292
+Columnas finales:              8
+Tamaño CSV:                    473.0 MB
+Tamaño Parquet:                94.6 MB
