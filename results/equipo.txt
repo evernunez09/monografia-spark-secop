@@ -1,0 +1,7 @@
+Sistema operativo: Windows-10-10.0.26200-SP0
+Procesador: AMD Ryzen 7 4800H with Radeon Graphics (2.90 GHz)
+Núcleos lógicos: 16
+Memoria RAM: 16.6 GB
+Python: 3.11.9
+Java: 17.0.20.1
+Spark: 3.5.9
