@@ -1,4 +1,9 @@
-Filas descargadas:            2,734,515
+Filas descargadas:             2,734,515
+Valores con espacios especiales en los bordes (limpiados):
+  departamento: 0
+  nombre_entidad: 0
+  modalidad_de_contratacion: 0
+  proveedor_adjudicado: 50
 Sin valor o sin fecha (fuera): 0
 Duplicados (fuera):            223
 Filas finales:                 2,734,292
