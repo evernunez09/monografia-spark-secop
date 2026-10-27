@@ -218,3 +218,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Datos y artefactos de Spark (no se suben)
+data/
+spark-warehouse/
+metastore_db/
+*.parquet
+derby.log
