@@ -1,0 +1,6 @@
+Sistema operativo: Linux-6.18.54.1-microsoft-standard-WSL2-x86_64-with-glibc2.39
+Núcleos lógicos visibles: 16
+Memoria RAM visible: 12.5 GB
+Python: 3.11.9
+Java: 17.0.20.1
+Spark: 3.5.9
