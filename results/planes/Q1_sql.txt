@@ -1,0 +1,84 @@
+== Physical Plan ==
+AdaptiveSparkPlan (13)
++- == Final Plan ==
+   * HashAggregate (8)
+   +- AQEShuffleRead (7)
+      +- ShuffleQueryStage (6), Statistics(sizeInBytes=25.1 KiB, rowCount=578)
+         +- Exchange (5)
+            +- * HashAggregate (4)
+               +- * Project (3)
+                  +- * ColumnarToRow (2)
+                     +- Scan parquet  (1)
++- == Initial Plan ==
+   HashAggregate (12)
+   +- Exchange (11)
+      +- HashAggregate (10)
+         +- Project (9)
+            +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [2]: [departamento#1, valor#7]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<departamento:string,valor:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [2]: [departamento#1, valor#7]
+
+(3) Project [codegen id : 1]
+Output [2]: [valor#7, upper(trim(departamento#1, None)) AS _groupingexpression#57]
+Input [2]: [departamento#1, valor#7]
+
+(4) HashAggregate [codegen id : 1]
+Input [2]: [valor#7, _groupingexpression#57]
+Keys [1]: [_groupingexpression#57]
+Functions [2]: [partial_count(1), partial_sum(valor#7)]
+Aggregate Attributes [2]: [count#58L, sum#59]
+Results [3]: [_groupingexpression#57, count#60L, sum#61]
+
+(5) Exchange
+Input [3]: [_groupingexpression#57, count#60L, sum#61]
+Arguments: hashpartitioning(_groupingexpression#57, 200), ENSURE_REQUIREMENTS, [plan_id=83]
+
+(6) ShuffleQueryStage
+Output [3]: [_groupingexpression#57, count#60L, sum#61]
+Arguments: 0
+
+(7) AQEShuffleRead
+Input [3]: [_groupingexpression#57, count#60L, sum#61]
+Arguments: coalesced
+
+(8) HashAggregate [codegen id : 2]
+Input [3]: [_groupingexpression#57, count#60L, sum#61]
+Keys [1]: [_groupingexpression#57]
+Functions [2]: [count(1), sum(valor#7)]
+Aggregate Attributes [2]: [count(1)#52L, sum(valor#7)#53]
+Results [3]: [_groupingexpression#57 AS dep#49, count(1)#52L AS n#50L, sum(valor#7)#53 AS total#51]
+
+(9) Project
+Output [2]: [valor#7, upper(trim(departamento#1, None)) AS _groupingexpression#57]
+Input [2]: [departamento#1, valor#7]
+
+(10) HashAggregate
+Input [2]: [valor#7, _groupingexpression#57]
+Keys [1]: [_groupingexpression#57]
+Functions [2]: [partial_count(1), partial_sum(valor#7)]
+Aggregate Attributes [2]: [count#58L, sum#59]
+Results [3]: [_groupingexpression#57, count#60L, sum#61]
+
+(11) Exchange
+Input [3]: [_groupingexpression#57, count#60L, sum#61]
+Arguments: hashpartitioning(_groupingexpression#57, 200), ENSURE_REQUIREMENTS, [plan_id=65]
+
+(12) HashAggregate
+Input [3]: [_groupingexpression#57, count#60L, sum#61]
+Keys [1]: [_groupingexpression#57]
+Functions [2]: [count(1), sum(valor#7)]
+Aggregate Attributes [2]: [count(1)#52L, sum(valor#7)#53]
+Results [3]: [_groupingexpression#57 AS dep#49, count(1)#52L AS n#50L, sum(valor#7)#53 AS total#51]
+
+(13) AdaptiveSparkPlan
+Output [3]: [dep#49, n#50L, total#51]
+Arguments: isFinalPlan=true
+

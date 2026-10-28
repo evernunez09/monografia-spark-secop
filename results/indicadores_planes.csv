@@ -1,0 +1,25 @@
+consulta,variante,llamadas_python,intercambios_shuffle,broadcast_join,sort_merge_join,ventanas,ordenamientos,columnas_leidas,filtros_empujados
+Q1,DataFrame,0.0,1,0.0,0.0,0.0,0.0,2.0,
+Q1,Spark SQL,0.0,1,0.0,0.0,0.0,0.0,2.0,
+Q1,DataFrame + UDF,1.0,1,0.0,0.0,0.0,0.0,2.0,
+Q1,RDD,,1,,,,,,
+Q2,DataFrame,0.0,0,0.0,0.0,0.0,0.0,5.0,"GreaterThan(valor,1.0E8)"
+Q2,Spark SQL,0.0,0,0.0,0.0,0.0,0.0,5.0,"GreaterThan(valor,1.0E8)"
+Q2,DataFrame + UDF,1.0,0,0.0,0.0,0.0,0.0,5.0,"GreaterThan(valor,1.0E8)"
+Q2,RDD,,0,,,,,,
+Q3,DataFrame,0.0,1,0.0,0.0,0.0,0.0,3.0,
+Q3,Spark SQL,0.0,1,0.0,0.0,0.0,0.0,3.0,
+Q3,DataFrame + UDF,1.0,1,0.0,0.0,0.0,0.0,3.0,
+Q3,RDD,,1,,,,,,
+Q4,DataFrame,0.0,2,0.0,0.0,0.0,1.0,2.0,
+Q4,Spark SQL,0.0,2,0.0,0.0,0.0,1.0,2.0,
+Q4,DataFrame + UDF,1.0,2,0.0,0.0,0.0,1.0,2.0,
+Q4,RDD,,2,,,,,,
+Q5,DataFrame,0.0,2,0.0,0.0,0.0,0.0,3.0,
+Q5,Spark SQL,0.0,2,0.0,0.0,0.0,0.0,3.0,
+Q5,DataFrame + UDF,1.0,2,0.0,0.0,0.0,0.0,3.0,
+Q5,RDD,,4,,,,,,
+Q6,DataFrame,0.0,1,0.0,0.0,1.0,2.0,4.0,
+Q6,Spark SQL,0.0,1,0.0,0.0,1.0,2.0,4.0,
+Q6,DataFrame + UDF,1.0,1,0.0,0.0,1.0,2.0,4.0,
+Q6,RDD,,1,,,,,,

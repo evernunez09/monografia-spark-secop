@@ -1,0 +1,122 @@
+== Physical Plan ==
+AdaptiveSparkPlan (23)
++- == Final Plan ==
+   * Project (13)
+   +- * Filter (12)
+      +- Window (11)
+         +- WindowGroupLimit (10)
+            +- * Sort (9)
+               +- AQEShuffleRead (8)
+                  +- ShuffleQueryStage (7), Statistics(sizeInBytes=11.9 MiB, rowCount=1.17E+5)
+                     +- Exchange (6)
+                        +- WindowGroupLimit (5)
+                           +- * Sort (4)
+                              +- * Project (3)
+                                 +- * ColumnarToRow (2)
+                                    +- Scan parquet  (1)
++- == Initial Plan ==
+   Project (22)
+   +- Filter (21)
+      +- Window (20)
+         +- WindowGroupLimit (19)
+            +- Sort (18)
+               +- Exchange (17)
+                  +- WindowGroupLimit (16)
+                     +- Sort (15)
+                        +- Project (14)
+                           +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [4]: [id_contrato#0, nombre_entidad#2, anio#6, valor#7]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<id_contrato:string,nombre_entidad:string,anio:int,valor:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [4]: [id_contrato#0, nombre_entidad#2, anio#6, valor#7]
+
+(3) Project [codegen id : 1]
+Output [4]: [id_contrato#0, anio#6, valor#7, upper(trim(nombre_entidad#2, None)) AS entidad#498]
+Input [4]: [id_contrato#0, nombre_entidad#2, anio#6, valor#7]
+
+(4) Sort [codegen id : 1]
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498 ASC NULLS FIRST, anio#6 ASC NULLS FIRST, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], false, 0
+
+(5) WindowGroupLimit
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], row_number(), 1, Partial
+
+(6) Exchange
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: hashpartitioning(entidad#498, anio#6, 200), ENSURE_REQUIREMENTS, [plan_id=1530]
+
+(7) ShuffleQueryStage
+Output [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: 0
+
+(8) AQEShuffleRead
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: coalesced
+
+(9) Sort [codegen id : 2]
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498 ASC NULLS FIRST, anio#6 ASC NULLS FIRST, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], false, 0
+
+(10) WindowGroupLimit
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], row_number(), 1, Final
+
+(11) Window
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [row_number() windowspecdefinition(entidad#498, anio#6, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS posicion#509], [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST]
+
+(12) Filter [codegen id : 3]
+Input [5]: [id_contrato#0, anio#6, valor#7, entidad#498, posicion#509]
+Condition : (posicion#509 = 1)
+
+(13) Project [codegen id : 3]
+Output [4]: [entidad#498, anio#6, id_contrato#0, valor#7]
+Input [5]: [id_contrato#0, anio#6, valor#7, entidad#498, posicion#509]
+
+(14) Project
+Output [4]: [id_contrato#0, anio#6, valor#7, upper(trim(nombre_entidad#2, None)) AS entidad#498]
+Input [4]: [id_contrato#0, nombre_entidad#2, anio#6, valor#7]
+
+(15) Sort
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498 ASC NULLS FIRST, anio#6 ASC NULLS FIRST, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], false, 0
+
+(16) WindowGroupLimit
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], row_number(), 1, Partial
+
+(17) Exchange
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: hashpartitioning(entidad#498, anio#6, 200), ENSURE_REQUIREMENTS, [plan_id=1504]
+
+(18) Sort
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498 ASC NULLS FIRST, anio#6 ASC NULLS FIRST, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], false, 0
+
+(19) WindowGroupLimit
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST], row_number(), 1, Final
+
+(20) Window
+Input [4]: [id_contrato#0, anio#6, valor#7, entidad#498]
+Arguments: [row_number() windowspecdefinition(entidad#498, anio#6, valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST, specifiedwindowframe(RowFrame, unboundedpreceding$(), currentrow$())) AS posicion#509], [entidad#498, anio#6], [valor#7 DESC NULLS LAST, id_contrato#0 ASC NULLS FIRST]
+
+(21) Filter
+Input [5]: [id_contrato#0, anio#6, valor#7, entidad#498, posicion#509]
+Condition : (posicion#509 = 1)
+
+(22) Project
+Output [4]: [entidad#498, anio#6, id_contrato#0, valor#7]
+Input [5]: [id_contrato#0, anio#6, valor#7, entidad#498, posicion#509]
+
+(23) AdaptiveSparkPlan
+Output [4]: [entidad#498, anio#6, id_contrato#0, valor#7]
+Arguments: isFinalPlan=true
+

@@ -1,0 +1,114 @@
+== Physical Plan ==
+AdaptiveSparkPlan (19)
++- == Final Plan ==
+   * Sort (12)
+   +- AQEShuffleRead (11)
+      +- ShuffleQueryStage (10), Statistics(sizeInBytes=44.9 MiB, rowCount=8.71E+5)
+         +- Exchange (9)
+            +- * HashAggregate (8)
+               +- AQEShuffleRead (7)
+                  +- ShuffleQueryStage (6), Statistics(sizeInBytes=120.4 MiB, rowCount=2.34E+6)
+                     +- Exchange (5)
+                        +- * HashAggregate (4)
+                           +- * Project (3)
+                              +- * ColumnarToRow (2)
+                                 +- Scan parquet  (1)
++- == Initial Plan ==
+   Sort (18)
+   +- Exchange (17)
+      +- HashAggregate (16)
+         +- Exchange (15)
+            +- HashAggregate (14)
+               +- Project (13)
+                  +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [2]: [proveedor_adjudicado#4, valor#7]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<proveedor_adjudicado:string,valor:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [2]: [proveedor_adjudicado#4, valor#7]
+
+(3) Project [codegen id : 1]
+Output [2]: [valor#7, upper(trim(proveedor_adjudicado#4, None)) AS _groupingexpression#251]
+Input [2]: [proveedor_adjudicado#4, valor#7]
+
+(4) HashAggregate [codegen id : 1]
+Input [2]: [valor#7, _groupingexpression#251]
+Keys [1]: [_groupingexpression#251]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#252]
+Results [2]: [_groupingexpression#251, sum#253]
+
+(5) Exchange
+Input [2]: [_groupingexpression#251, sum#253]
+Arguments: hashpartitioning(_groupingexpression#251, 200), ENSURE_REQUIREMENTS, [plan_id=557]
+
+(6) ShuffleQueryStage
+Output [2]: [_groupingexpression#251, sum#253]
+Arguments: 0
+
+(7) AQEShuffleRead
+Input [2]: [_groupingexpression#251, sum#253]
+Arguments: coalesced
+
+(8) HashAggregate [codegen id : 2]
+Input [2]: [_groupingexpression#251, sum#253]
+Keys [1]: [_groupingexpression#251]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#248]
+Results [2]: [_groupingexpression#251 AS proveedor#246, sum(valor#7)#248 AS total#247]
+
+(9) Exchange
+Input [2]: [proveedor#246, total#247]
+Arguments: rangepartitioning(total#247 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=587]
+
+(10) ShuffleQueryStage
+Output [2]: [proveedor#246, total#247]
+Arguments: 1
+
+(11) AQEShuffleRead
+Input [2]: [proveedor#246, total#247]
+Arguments: coalesced
+
+(12) Sort [codegen id : 3]
+Input [2]: [proveedor#246, total#247]
+Arguments: [total#247 DESC NULLS LAST], true, 0
+
+(13) Project
+Output [2]: [valor#7, upper(trim(proveedor_adjudicado#4, None)) AS _groupingexpression#251]
+Input [2]: [proveedor_adjudicado#4, valor#7]
+
+(14) HashAggregate
+Input [2]: [valor#7, _groupingexpression#251]
+Keys [1]: [_groupingexpression#251]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#252]
+Results [2]: [_groupingexpression#251, sum#253]
+
+(15) Exchange
+Input [2]: [_groupingexpression#251, sum#253]
+Arguments: hashpartitioning(_groupingexpression#251, 200), ENSURE_REQUIREMENTS, [plan_id=532]
+
+(16) HashAggregate
+Input [2]: [_groupingexpression#251, sum#253]
+Keys [1]: [_groupingexpression#251]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#248]
+Results [2]: [_groupingexpression#251 AS proveedor#246, sum(valor#7)#248 AS total#247]
+
+(17) Exchange
+Input [2]: [proveedor#246, total#247]
+Arguments: rangepartitioning(total#247 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=535]
+
+(18) Sort
+Input [2]: [proveedor#246, total#247]
+Arguments: [total#247 DESC NULLS LAST], true, 0
+
+(19) AdaptiveSparkPlan
+Output [2]: [proveedor#246, total#247]
+Arguments: isFinalPlan=true
+

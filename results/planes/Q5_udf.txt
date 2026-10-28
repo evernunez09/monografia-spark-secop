@@ -1,0 +1,255 @@
+== Physical Plan ==
+AdaptiveSparkPlan (42)
++- == Final Plan ==
+   * Project (22)
+   +- * BroadcastHashJoin Inner BuildRight (21)
+      :- * HashAggregate (9)
+      :  +- AQEShuffleRead (8)
+      :     +- ShuffleQueryStage (7), Statistics(sizeInBytes=4.5 MiB, rowCount=5.21E+4)
+      :        +- Exchange (6)
+      :           +- * HashAggregate (5)
+      :              +- * Project (4)
+      :                 +- BatchEvalPython (3)
+      :                    +- * ColumnarToRow (2)
+      :                       +- Scan parquet  (1)
+      +- BroadcastQueryStage (20), Statistics(sizeInBytes=16.0 MiB, rowCount=34)
+         +- BroadcastExchange (19)
+            +- * HashAggregate (18)
+               +- AQEShuffleRead (17)
+                  +- ShuffleQueryStage (16), Statistics(sizeInBytes=3.6 KiB, rowCount=101)
+                     +- Exchange (15)
+                        +- * HashAggregate (14)
+                           +- * HashAggregate (13)
+                              +- AQEShuffleRead (12)
+                                 +- ShuffleQueryStage (11), Statistics(sizeInBytes=4.5 MiB, rowCount=5.21E+4)
+                                    +- ReusedExchange (10)
++- == Initial Plan ==
+   Project (41)
+   +- SortMergeJoin Inner (40)
+      :- Sort (29)
+      :  +- Exchange (28)
+      :     +- HashAggregate (27)
+      :        +- Exchange (26)
+      :           +- HashAggregate (25)
+      :              +- Project (24)
+      :                 +- BatchEvalPython (23)
+      :                    +- Scan parquet  (1)
+      +- Sort (39)
+         +- HashAggregate (38)
+            +- Exchange (37)
+               +- HashAggregate (36)
+                  +- HashAggregate (35)
+                     +- Exchange (34)
+                        +- HashAggregate (33)
+                           +- Project (32)
+                              +- BatchEvalPython (31)
+                                 +- Scan parquet  (30)
+
+
+(1) Scan parquet 
+Output [3]: [departamento#1, nombre_entidad#2, valor#7]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<departamento:string,nombre_entidad:string,valor:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [3]: [departamento#1, nombre_entidad#2, valor#7]
+
+(3) BatchEvalPython
+Input [3]: [departamento#1, nombre_entidad#2, valor#7]
+Arguments: [<lambda>(departamento#1)#418], [pythonUDF0#474]
+
+(4) Project [codegen id : 2]
+Output [3]: [nombre_entidad#2, valor#7, pythonUDF0#474 AS dep#419]
+Input [4]: [departamento#1, nombre_entidad#2, valor#7, pythonUDF0#474]
+
+(5) HashAggregate [codegen id : 2]
+Input [3]: [nombre_entidad#2, valor#7, dep#419]
+Keys [2]: [dep#419, nombre_entidad#2]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#476]
+Results [3]: [dep#419, nombre_entidad#2, sum#477]
+
+(6) Exchange
+Input [3]: [dep#419, nombre_entidad#2, sum#477]
+Arguments: hashpartitioning(dep#419, nombre_entidad#2, 200), ENSURE_REQUIREMENTS, [plan_id=1297]
+
+(7) ShuffleQueryStage
+Output [3]: [dep#419, nombre_entidad#2, sum#477]
+Arguments: 0
+
+(8) AQEShuffleRead
+Input [3]: [dep#419, nombre_entidad#2, sum#477]
+Arguments: coalesced
+
+(9) HashAggregate [codegen id : 7]
+Input [3]: [dep#419, nombre_entidad#2, sum#477]
+Keys [2]: [dep#419, nombre_entidad#2]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#438]
+Results [3]: [dep#419, nombre_entidad#2, sum(valor#7)#438 AS total_ent#439]
+
+(10) ReusedExchange [Reuses operator id: 6]
+Output [3]: [dep#458, nombre_entidad#452, sum#481]
+
+(11) ShuffleQueryStage
+Output [3]: [dep#458, nombre_entidad#452, sum#481]
+Arguments: 2
+
+(12) AQEShuffleRead
+Input [3]: [dep#458, nombre_entidad#452, sum#481]
+Arguments: coalesced
+
+(13) HashAggregate [codegen id : 5]
+Input [3]: [dep#458, nombre_entidad#452, sum#481]
+Keys [2]: [dep#458, nombre_entidad#452]
+Functions [1]: [sum(valor#457)]
+Aggregate Attributes [1]: [sum(valor#457)#438]
+Results [2]: [dep#458, sum(valor#457)#438 AS total_ent#439]
+
+(14) HashAggregate [codegen id : 5]
+Input [2]: [dep#458, total_ent#439]
+Keys [1]: [dep#458]
+Functions [1]: [partial_sum(total_ent#439)]
+Aggregate Attributes [1]: [sum#478]
+Results [2]: [dep#458, sum#479]
+
+(15) Exchange
+Input [2]: [dep#458, sum#479]
+Arguments: hashpartitioning(dep#458, 200), ENSURE_REQUIREMENTS, [plan_id=1404]
+
+(16) ShuffleQueryStage
+Output [2]: [dep#458, sum#479]
+Arguments: 3
+
+(17) AQEShuffleRead
+Input [2]: [dep#458, sum#479]
+Arguments: coalesced
+
+(18) HashAggregate [codegen id : 6]
+Input [2]: [dep#458, sum#479]
+Keys [1]: [dep#458]
+Functions [1]: [sum(total_ent#439)]
+Aggregate Attributes [1]: [sum(total_ent#439)#446]
+Results [2]: [dep#458, sum(total_ent#439)#446 AS total_dep#447]
+
+(19) BroadcastExchange
+Input [2]: [dep#458, total_dep#447]
+Arguments: HashedRelationBroadcastMode(List(input[0, string, true]),false), [plan_id=1440]
+
+(20) BroadcastQueryStage
+Output [2]: [dep#458, total_dep#447]
+Arguments: 4
+
+(21) BroadcastHashJoin [codegen id : 7]
+Left keys [1]: [dep#419]
+Right keys [1]: [dep#458]
+Join type: Inner
+Join condition: None
+
+(22) Project [codegen id : 7]
+Output [4]: [dep#419, nombre_entidad#2, total_ent#439, (total_ent#439 / total_dep#447) AS participacion#464]
+Input [5]: [dep#419, nombre_entidad#2, total_ent#439, dep#458, total_dep#447]
+
+(23) BatchEvalPython
+Input [3]: [departamento#1, nombre_entidad#2, valor#7]
+Arguments: [<lambda>(departamento#1)#418], [pythonUDF0#474]
+
+(24) Project
+Output [3]: [nombre_entidad#2, valor#7, pythonUDF0#474 AS dep#419]
+Input [4]: [departamento#1, nombre_entidad#2, valor#7, pythonUDF0#474]
+
+(25) HashAggregate
+Input [3]: [nombre_entidad#2, valor#7, dep#419]
+Keys [2]: [dep#419, nombre_entidad#2]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#476]
+Results [3]: [dep#419, nombre_entidad#2, sum#477]
+
+(26) Exchange
+Input [3]: [dep#419, nombre_entidad#2, sum#477]
+Arguments: hashpartitioning(dep#419, nombre_entidad#2, 200), ENSURE_REQUIREMENTS, [plan_id=1256]
+
+(27) HashAggregate
+Input [3]: [dep#419, nombre_entidad#2, sum#477]
+Keys [2]: [dep#419, nombre_entidad#2]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#438]
+Results [3]: [dep#419, nombre_entidad#2, sum(valor#7)#438 AS total_ent#439]
+
+(28) Exchange
+Input [3]: [dep#419, nombre_entidad#2, total_ent#439]
+Arguments: hashpartitioning(dep#419, 200), ENSURE_REQUIREMENTS, [plan_id=1266]
+
+(29) Sort
+Input [3]: [dep#419, nombre_entidad#2, total_ent#439]
+Arguments: [dep#419 ASC NULLS FIRST], false, 0
+
+(30) Scan parquet 
+Output [3]: [departamento#451, nombre_entidad#452, valor#457]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<departamento:string,nombre_entidad:string,valor:double>
+
+(31) BatchEvalPython
+Input [3]: [departamento#451, nombre_entidad#452, valor#457]
+Arguments: [<lambda>(departamento#451)#418], [pythonUDF0#475]
+
+(32) Project
+Output [3]: [nombre_entidad#452, valor#457, pythonUDF0#475 AS dep#458]
+Input [4]: [departamento#451, nombre_entidad#452, valor#457, pythonUDF0#475]
+
+(33) HashAggregate
+Input [3]: [nombre_entidad#452, valor#457, dep#458]
+Keys [2]: [dep#458, nombre_entidad#452]
+Functions [1]: [partial_sum(valor#457)]
+Aggregate Attributes [1]: [sum#480]
+Results [3]: [dep#458, nombre_entidad#452, sum#481]
+
+(34) Exchange
+Input [3]: [dep#458, nombre_entidad#452, sum#481]
+Arguments: hashpartitioning(dep#458, nombre_entidad#452, 200), ENSURE_REQUIREMENTS, [plan_id=1258]
+
+(35) HashAggregate
+Input [3]: [dep#458, nombre_entidad#452, sum#481]
+Keys [2]: [dep#458, nombre_entidad#452]
+Functions [1]: [sum(valor#457)]
+Aggregate Attributes [1]: [sum(valor#457)#438]
+Results [2]: [dep#458, sum(valor#457)#438 AS total_ent#439]
+
+(36) HashAggregate
+Input [2]: [dep#458, total_ent#439]
+Keys [1]: [dep#458]
+Functions [1]: [partial_sum(total_ent#439)]
+Aggregate Attributes [1]: [sum#478]
+Results [2]: [dep#458, sum#479]
+
+(37) Exchange
+Input [2]: [dep#458, sum#479]
+Arguments: hashpartitioning(dep#458, 200), ENSURE_REQUIREMENTS, [plan_id=1262]
+
+(38) HashAggregate
+Input [2]: [dep#458, sum#479]
+Keys [1]: [dep#458]
+Functions [1]: [sum(total_ent#439)]
+Aggregate Attributes [1]: [sum(total_ent#439)#446]
+Results [2]: [dep#458, sum(total_ent#439)#446 AS total_dep#447]
+
+(39) Sort
+Input [2]: [dep#458, total_dep#447]
+Arguments: [dep#458 ASC NULLS FIRST], false, 0
+
+(40) SortMergeJoin
+Left keys [1]: [dep#419]
+Right keys [1]: [dep#458]
+Join type: Inner
+Join condition: None
+
+(41) Project
+Output [4]: [dep#419, nombre_entidad#2, total_ent#439, (total_ent#439 / total_dep#447) AS participacion#464]
+Input [5]: [dep#419, nombre_entidad#2, total_ent#439, dep#458, total_dep#447]
+
+(42) AdaptiveSparkPlan
+Output [4]: [dep#419, nombre_entidad#2, total_ent#439, participacion#464]
+Arguments: isFinalPlan=true
+

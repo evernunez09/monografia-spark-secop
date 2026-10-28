@@ -1,0 +1,7 @@
+(17) PythonRDD[58] at RDD at PythonRDD.scala:53 []
+ |   MapPartitionsRDD[57] at javaToPython at NativeMethodAccessorImpl.java:0 []
+ |   MapPartitionsRDD[56] at javaToPython at NativeMethodAccessorImpl.java:0 []
+ |   SQLExecutionRDD[55] at javaToPython at NativeMethodAccessorImpl.java:0 []
+ |   MapPartitionsRDD[54] at javaToPython at NativeMethodAccessorImpl.java:0 []
+ |   MapPartitionsRDD[53] at javaToPython at NativeMethodAccessorImpl.java:0 []
+ |   FileScanRDD[52] at javaToPython at NativeMethodAccessorImpl.java:0 []

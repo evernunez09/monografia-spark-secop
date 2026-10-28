@@ -1,0 +1,124 @@
+== Physical Plan ==
+AdaptiveSparkPlan (21)
++- == Final Plan ==
+   * Sort (13)
+   +- AQEShuffleRead (12)
+      +- ShuffleQueryStage (11), Statistics(sizeInBytes=44.9 MiB, rowCount=8.71E+5)
+         +- Exchange (10)
+            +- * HashAggregate (9)
+               +- AQEShuffleRead (8)
+                  +- ShuffleQueryStage (7), Statistics(sizeInBytes=120.4 MiB, rowCount=2.34E+6)
+                     +- Exchange (6)
+                        +- * HashAggregate (5)
+                           +- * Project (4)
+                              +- BatchEvalPython (3)
+                                 +- * ColumnarToRow (2)
+                                    +- Scan parquet  (1)
++- == Initial Plan ==
+   Sort (20)
+   +- Exchange (19)
+      +- HashAggregate (18)
+         +- Exchange (17)
+            +- HashAggregate (16)
+               +- Project (15)
+                  +- BatchEvalPython (14)
+                     +- Scan parquet  (1)
+
+
+(1) Scan parquet 
+Output [2]: [proveedor_adjudicado#4, valor#7]
+Batched: true
+Location: InMemoryFileIndex [file:/home/evere/proyectos/monografia-spark-secop/data/secop.parquet]
+ReadSchema: struct<proveedor_adjudicado:string,valor:double>
+
+(2) ColumnarToRow [codegen id : 1]
+Input [2]: [proveedor_adjudicado#4, valor#7]
+
+(3) BatchEvalPython
+Input [2]: [proveedor_adjudicado#4, valor#7]
+Arguments: [<lambda>(proveedor_adjudicado#4)#258], [pythonUDF0#282]
+
+(4) Project [codegen id : 2]
+Output [2]: [valor#7, pythonUDF0#282 AS proveedor#259]
+Input [3]: [proveedor_adjudicado#4, valor#7, pythonUDF0#282]
+
+(5) HashAggregate [codegen id : 2]
+Input [2]: [valor#7, proveedor#259]
+Keys [1]: [proveedor#259]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#283]
+Results [2]: [proveedor#259, sum#284]
+
+(6) Exchange
+Input [2]: [proveedor#259, sum#284]
+Arguments: hashpartitioning(proveedor#259, 200), ENSURE_REQUIREMENTS, [plan_id=660]
+
+(7) ShuffleQueryStage
+Output [2]: [proveedor#259, sum#284]
+Arguments: 0
+
+(8) AQEShuffleRead
+Input [2]: [proveedor#259, sum#284]
+Arguments: coalesced
+
+(9) HashAggregate [codegen id : 3]
+Input [2]: [proveedor#259, sum#284]
+Keys [1]: [proveedor#259]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#278]
+Results [2]: [proveedor#259, sum(valor#7)#278 AS total#279]
+
+(10) Exchange
+Input [2]: [proveedor#259, total#279]
+Arguments: rangepartitioning(total#279 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=694]
+
+(11) ShuffleQueryStage
+Output [2]: [proveedor#259, total#279]
+Arguments: 1
+
+(12) AQEShuffleRead
+Input [2]: [proveedor#259, total#279]
+Arguments: coalesced
+
+(13) Sort [codegen id : 4]
+Input [2]: [proveedor#259, total#279]
+Arguments: [total#279 DESC NULLS LAST], true, 0
+
+(14) BatchEvalPython
+Input [2]: [proveedor_adjudicado#4, valor#7]
+Arguments: [<lambda>(proveedor_adjudicado#4)#258], [pythonUDF0#282]
+
+(15) Project
+Output [2]: [valor#7, pythonUDF0#282 AS proveedor#259]
+Input [3]: [proveedor_adjudicado#4, valor#7, pythonUDF0#282]
+
+(16) HashAggregate
+Input [2]: [valor#7, proveedor#259]
+Keys [1]: [proveedor#259]
+Functions [1]: [partial_sum(valor#7)]
+Aggregate Attributes [1]: [sum#283]
+Results [2]: [proveedor#259, sum#284]
+
+(17) Exchange
+Input [2]: [proveedor#259, sum#284]
+Arguments: hashpartitioning(proveedor#259, 200), ENSURE_REQUIREMENTS, [plan_id=629]
+
+(18) HashAggregate
+Input [2]: [proveedor#259, sum#284]
+Keys [1]: [proveedor#259]
+Functions [1]: [sum(valor#7)]
+Aggregate Attributes [1]: [sum(valor#7)#278]
+Results [2]: [proveedor#259, sum(valor#7)#278 AS total#279]
+
+(19) Exchange
+Input [2]: [proveedor#259, total#279]
+Arguments: rangepartitioning(total#279 DESC NULLS LAST, 200), ENSURE_REQUIREMENTS, [plan_id=632]
+
+(20) Sort
+Input [2]: [proveedor#259, total#279]
+Arguments: [total#279 DESC NULLS LAST], true, 0
+
+(21) AdaptiveSparkPlan
+Output [2]: [proveedor#259, total#279]
+Arguments: isFinalPlan=true
+
